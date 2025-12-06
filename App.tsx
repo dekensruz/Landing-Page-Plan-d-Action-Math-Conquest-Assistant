@@ -22,7 +22,7 @@ const AIChatAssistant = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([
-    { role: 'model', text: "Bonjour ! Je suis l'assistant du projet Math Conquest. Je connais tout le planning, l'équipe et la stack technique. Comment puis-je vous aider ?" }
+    { role: 'model', text: "Bonjour ! Je suis l'assistant dédié au projet Math Conquest. Je suis là pour vous aider sur le planning, les tâches et l'architecture." }
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -43,10 +43,16 @@ const AIChatAssistant = () => {
     setIsLoading(true);
 
     try {
-      // Vérification basique de la clé (sans l'afficher)
-      if (!process.env.API_KEY) {
-        console.error("API_KEY est manquante dans process.env");
-        throw new Error("Clé API manquante");
+      // Tentative de récupération sécurisée de la clé
+      let apiKey = '';
+      try {
+        apiKey = process.env.API_KEY || '';
+      } catch (e) {
+        // Ignorer si process n'est pas défini
+      }
+
+      if (!apiKey) {
+        throw new Error("API_KEY_MISSING");
       }
 
       // Préparation du contexte du projet pour l'IA
@@ -59,21 +65,23 @@ const AIChatAssistant = () => {
         techStack: "React, Vite, Tailwind, Python, Supabase (PostgreSQL, Auth, RLS), OpenAI Vision, WolframAlpha"
       });
 
-      const systemInstruction = `Tu es l'assistant expert du projet 'Math Conquest Assistant'. 
-      Ton rôle est d'aider l'équipe (Dekens, Israêl, Verbeck, Thibaut, Sarah) à réussir le projet.
+      const systemInstruction = `Tu es "L'Assistant Math Conquest", une IA experte en gestion de projet dédiée à cette application.
       
-      Voici le contexte complet du projet au format JSON :
+      CONTEXTE DU PROJET :
       ${projectContext}
 
-      Règles :
-      1. Réponds de manière précise en te basant sur le planning et les rôles définis.
-      2. Si on te demande du code (ex: Supabase, React), fournis des exemples pertinents et sécurisés (RLS, best practices).
-      3. Sois encourageant et professionnel.
-      4. Si la question est hors sujet du projet, ramène gentiment la conversation vers le projet.
-      5. Ne mentionne jamais que tu es un modèle Gemini ou Google. Tu es "L'Assistant Math Conquest".
+      RÈGLES STRICTES D'IDENTITÉ :
+      1. Tu N'ES PAS Gemini, ni Google, ni une IA générique.
+      2. Tu es une IA spécialisée conçue pour l'équipe Math Conquest.
+      3. Si on te demande qui t'a créé, réponds que tu es l'assistant virtuel du projet Math Conquest.
+
+      RÈGLES DE RÉPONSE :
+      1. Réponds de manière précise en te basant sur le planning et les rôles définis ci-dessus.
+      2. Fournis des solutions techniques concrètes (code, architecture) si demandé.
+      3. Sois professionnel, motivant et direct.
       `;
 
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: apiKey });
       
       // Construction de l'historique pour l'API
       const historyForModel = messages.slice(-10).map(m => ({
@@ -96,16 +104,17 @@ const AIChatAssistant = () => {
       console.error("Erreur IA détaillée:", error);
       let errorMessage = "Une erreur technique est survenue.";
       
-      // Tentative de détection du type d'erreur
       if (error instanceof Error) {
-        if (error.message.includes("API key")) {
-          errorMessage = "Erreur de configuration : Clé API invalide ou manquante.";
-        } else if (error.message.includes("fetch")) {
-          errorMessage = "Erreur de connexion réseau.";
+        if (error.message === "API_KEY_MISSING") {
+          errorMessage = "⚠️ <b>Configuration requise</b> : La clé API n'est pas détectée.<br/><br/>Sur Vercel, assurez-vous que la variable d'environnement <code>API_KEY</code> est bien définie dans les paramètres du projet.";
+        } else if (error.message.includes("API key")) {
+          errorMessage = "Erreur de clé API : La clé fournie semble invalide.";
+        } else if (error.message.includes("fetch") || error.message.includes("network")) {
+          errorMessage = "Erreur de connexion réseau. Vérifiez votre connexion internet.";
         }
       }
 
-      setMessages(prev => [...prev, { role: 'model', text: errorMessage + " Vérifiez la console pour plus de détails." }]);
+      setMessages(prev => [...prev, { role: 'model', text: errorMessage }]);
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +125,7 @@ const AIChatAssistant = () => {
       {/* Floating Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${isOpen ? 'bg-red-500 rotate-90' : 'bg-gradient-to-r from-blue-600 to-indigo-600'}`}
+        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${isOpen ? 'bg-slate-800 rotate-90' : 'bg-gradient-to-r from-blue-600 to-indigo-600'}`}
       >
         {isOpen ? <X text-white size={24} color="white" /> : <Bot size={28} color="white" />}
       </button>
@@ -126,15 +135,15 @@ const AIChatAssistant = () => {
         <div className="fixed bottom-24 right-6 w-[90vw] sm:w-[400px] h-[500px] bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 z-50 flex flex-col overflow-hidden animate-fade-in-up origin-bottom-right">
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-full">
-              <BrainCircuit size={18} className="text-white" />
+          <div className="bg-slate-900 p-4 flex items-center gap-3">
+            <div className="p-2 bg-white/10 rounded-full">
+              <BrainCircuit size={18} className="text-blue-400" />
             </div>
             <div>
               <h3 className="font-bold text-white text-sm">Assistant Math Conquest</h3>
-              <p className="text-blue-100 text-xs flex items-center gap-1">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                En ligne • IA Project Expert
+              <p className="text-slate-400 text-xs flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                Connecté
               </p>
             </div>
           </div>
@@ -145,7 +154,7 @@ const AIChatAssistant = () => {
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
                   msg.role === 'user' 
-                    ? 'bg-blue-600 text-white rounded-tr-none' 
+                    ? 'bg-blue-600 text-white rounded-tr-none shadow-md' 
                     : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm'
                 }`}>
                   {msg.role === 'model' ? (
@@ -160,7 +169,7 @@ const AIChatAssistant = () => {
               <div className="flex justify-start">
                 <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
                   <Loader2 size={16} className="animate-spin text-blue-500" />
-                  <span className="text-xs text-slate-500">Analyse en cours...</span>
+                  <span className="text-xs text-slate-500">Réflexion en cours...</span>
                 </div>
               </div>
             )}
@@ -181,7 +190,7 @@ const AIChatAssistant = () => {
               <button 
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
-                className="absolute right-2 p-1.5 bg-blue-600 rounded-lg text-white hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors"
+                className="absolute right-2 p-1.5 bg-slate-900 rounded-lg text-white hover:bg-slate-700 disabled:opacity-50 disabled:hover:bg-slate-800 transition-colors"
               >
                 <Send size={16} />
               </button>
