@@ -1,11 +1,178 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { 
   Calendar, 
   Target, 
   CheckSquare, 
-  AlertTriangle, 
+  AlertTriangle,
+  MessageSquare,
+  X,
+  Send,
+  Bot,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
+import { GoogleGenAI } from "@google/genai";
 import { PROJECT_INFO, CURRENT_STATE, OBJECTIVES, SPRINTS, TEAM, RISKS } from './constants';
+
+// --- AI Chat Component ---
+const AIChatAssistant = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([
+    { role: 'model', text: "Bonjour ! Je suis l'assistant du projet Math Conquest. Je connais tout le planning, l'équipe et la stack technique. Comment puis-je vous aider ?" }
+  ]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isOpen]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMsg = input;
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+    setIsLoading(true);
+
+    try {
+      // Préparation du contexte du projet pour l'IA
+      const projectContext = JSON.stringify({
+        project: PROJECT_INFO,
+        sprints: SPRINTS,
+        team: TEAM,
+        risks: RISKS,
+        objectives: OBJECTIVES,
+        techStack: "React, Vite, Tailwind, Python, Supabase (PostgreSQL, Auth, RLS), OpenAI Vision, WolframAlpha"
+      });
+
+      const systemInstruction = `Tu es l'assistant expert du projet 'Math Conquest Assistant'. 
+      Ton rôle est d'aider l'équipe (Dekens, Israêl, Verbeck, Thibaut, Sarah) à réussir le projet.
+      
+      Voici le contexte complet du projet au format JSON :
+      ${projectContext}
+
+      Règles :
+      1. Réponds de manière précise en te basant sur le planning et les rôles définis.
+      2. Si on te demande du code (ex: Supabase, React), fournis des exemples pertinents et sécurisés (RLS, best practices).
+      3. Sois encourageant et professionnel.
+      4. Si la question est hors sujet du projet, ramène gentiment la conversation vers le projet.
+      `;
+
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      
+      // Construction de l'historique pour l'API
+      // Note: On limite l'historique pour éviter de surcharger les tokens si la conversation est longue
+      const historyForModel = messages.slice(-10).map(m => ({
+        role: m.role === 'model' ? 'model' : 'user',
+        parts: [{ text: m.text }]
+      }));
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [...historyForModel, { role: 'user', parts: [{ text: userMsg }] }],
+        config: {
+          systemInstruction: systemInstruction,
+        }
+      });
+
+      const aiResponse = response.text;
+      setMessages(prev => [...prev, { role: 'model', text: aiResponse }]);
+
+    } catch (error) {
+      console.error("Erreur IA:", error);
+      setMessages(prev => [...prev, { role: 'model', text: "Désolé, j'ai rencontré une erreur de connexion. Veuillez vérifier votre clé API ou réessayer." }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Floating Button */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${isOpen ? 'bg-red-500 rotate-90' : 'bg-gradient-to-r from-blue-600 to-indigo-600'}`}
+      >
+        {isOpen ? <X text-white size={24} color="white" /> : <Bot size={28} color="white" />}
+      </button>
+
+      {/* Chat Window */}
+      {isOpen && (
+        <div className="fixed bottom-24 right-6 w-[90vw] sm:w-[400px] h-[500px] bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 z-50 flex flex-col overflow-hidden animate-fade-in-up origin-bottom-right">
+          
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex items-center gap-3">
+            <div className="p-2 bg-white/20 rounded-full">
+              <Sparkles size={18} className="text-yellow-300" />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-sm">Assistant Projet</h3>
+              <p className="text-blue-100 text-xs flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                En ligne • Gemini Flash
+              </p>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
+                  msg.role === 'user' 
+                    ? 'bg-blue-600 text-white rounded-tr-none' 
+                    : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm'
+                }`}>
+                  {msg.role === 'model' ? (
+                     <div dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
+                  ) : (
+                    msg.text
+                  )}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin text-blue-500" />
+                  <span className="text-xs text-slate-500">Réflexion en cours...</span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="p-3 bg-white border-t border-slate-100">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Posez une question sur le projet..."
+                className="w-full bg-slate-100 text-slate-800 text-sm rounded-xl py-3 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-400"
+              />
+              <button 
+                onClick={handleSend}
+                disabled={isLoading || !input.trim()}
+                className="absolute right-2 p-1.5 bg-blue-600 rounded-lg text-white hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors"
+              >
+                <Send size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 const App: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -53,10 +220,10 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-hidden relative">
       
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+      <nav className="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg text-lg sm:text-xl">
@@ -250,20 +417,20 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Success Metrics */}
+          {/* Success Metrics Targets */}
           <div className="bg-slate-900 rounded-[2rem] p-7 text-white shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-20 animate-pulse"></div>
             <h3 className="text-xl font-bold mb-6 flex items-center gap-3 text-white relative z-10">
               <Target size={20} className="text-green-400" />
-              Métriques de Succès
+              Objectifs de Succès
             </h3>
             <div className="grid grid-cols-1 gap-4 relative z-10">
               {[
-                { label: "Auth Supabase", val: "100%", sub: "Fonctionnelle" },
-                { label: "RLS Security", val: "Actif", sub: "Sur toutes les tables" },
-                { label: "Temps API", val: "< 5s", sub: "Performance cible" },
-                { label: "Déploiement", val: "Prod", sub: "Accessible en ligne" },
-                { label: "Test Coverage", val: "E2E", sub: "Critique validé" }
+                { label: "Auth Supabase", val: "Cible: 100%", sub: "À implémenter" },
+                { label: "RLS Security", val: "Cible: Actif", sub: "Sur toutes les tables" },
+                { label: "Temps API", val: "Cible: < 5s", sub: "Performance attendue" },
+                { label: "Déploiement", val: "Cible: Prod", sub: "Dispo 19 Déc" },
+                { label: "Tests E2E", val: "Cible: 100%", sub: "Couverture critique" }
               ].map((metric, idx) => (
                 <div key={idx} className="flex items-center justify-between border-b border-slate-800 pb-3 last:border-0 last:pb-0 hover:bg-white/5 p-1.5 rounded-lg transition-colors cursor-default">
                   <span className="text-base text-slate-300 font-medium">{metric.label}</span>
@@ -283,6 +450,10 @@ const App: React.FC = () => {
         </div>
 
       </main>
+
+      {/* AI Assistant Integration */}
+      <AIChatAssistant />
+      
     </div>
   );
 };
