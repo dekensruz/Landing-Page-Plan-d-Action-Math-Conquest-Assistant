@@ -1,3 +1,4 @@
+
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { 
   Calendar, 
@@ -9,7 +10,8 @@ import {
   Send,
   Bot,
   Sparkles,
-  Loader2
+  Loader2,
+  BrainCircuit
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { PROJECT_INFO, CURRENT_STATE, OBJECTIVES, SPRINTS, TEAM, RISKS } from './constants';
@@ -41,6 +43,12 @@ const AIChatAssistant = () => {
     setIsLoading(true);
 
     try {
+      // Vérification basique de la clé (sans l'afficher)
+      if (!process.env.API_KEY) {
+        console.error("API_KEY est manquante dans process.env");
+        throw new Error("Clé API manquante");
+      }
+
       // Préparation du contexte du projet pour l'IA
       const projectContext = JSON.stringify({
         project: PROJECT_INFO,
@@ -62,12 +70,12 @@ const AIChatAssistant = () => {
       2. Si on te demande du code (ex: Supabase, React), fournis des exemples pertinents et sécurisés (RLS, best practices).
       3. Sois encourageant et professionnel.
       4. Si la question est hors sujet du projet, ramène gentiment la conversation vers le projet.
+      5. Ne mentionne jamais que tu es un modèle Gemini ou Google. Tu es "L'Assistant Math Conquest".
       `;
 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
       // Construction de l'historique pour l'API
-      // Note: On limite l'historique pour éviter de surcharger les tokens si la conversation est longue
       const historyForModel = messages.slice(-10).map(m => ({
         role: m.role === 'model' ? 'model' : 'user',
         parts: [{ text: m.text }]
@@ -85,8 +93,19 @@ const AIChatAssistant = () => {
       setMessages(prev => [...prev, { role: 'model', text: aiResponse }]);
 
     } catch (error) {
-      console.error("Erreur IA:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "Désolé, j'ai rencontré une erreur de connexion. Veuillez vérifier votre clé API ou réessayer." }]);
+      console.error("Erreur IA détaillée:", error);
+      let errorMessage = "Une erreur technique est survenue.";
+      
+      // Tentative de détection du type d'erreur
+      if (error instanceof Error) {
+        if (error.message.includes("API key")) {
+          errorMessage = "Erreur de configuration : Clé API invalide ou manquante.";
+        } else if (error.message.includes("fetch")) {
+          errorMessage = "Erreur de connexion réseau.";
+        }
+      }
+
+      setMessages(prev => [...prev, { role: 'model', text: errorMessage + " Vérifiez la console pour plus de détails." }]);
     } finally {
       setIsLoading(false);
     }
@@ -109,13 +128,13 @@ const AIChatAssistant = () => {
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex items-center gap-3">
             <div className="p-2 bg-white/20 rounded-full">
-              <Sparkles size={18} className="text-yellow-300" />
+              <BrainCircuit size={18} className="text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm">Assistant Projet</h3>
+              <h3 className="font-bold text-white text-sm">Assistant Math Conquest</h3>
               <p className="text-blue-100 text-xs flex items-center gap-1">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                En ligne • Gemini Flash
+                En ligne • IA Project Expert
               </p>
             </div>
           </div>
@@ -141,7 +160,7 @@ const AIChatAssistant = () => {
               <div className="flex justify-start">
                 <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-2">
                   <Loader2 size={16} className="animate-spin text-blue-500" />
-                  <span className="text-xs text-slate-500">Réflexion en cours...</span>
+                  <span className="text-xs text-slate-500">Analyse en cours...</span>
                 </div>
               </div>
             )}
