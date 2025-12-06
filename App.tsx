@@ -17,13 +17,16 @@ import {
 import { GoogleGenAI } from "@google/genai";
 import { PROJECT_INFO, CURRENT_STATE, OBJECTIVES, SPRINTS, TEAM, RISKS } from './constants';
 
+// Declare marked global from the CDN script
+declare const marked: any;
+
 // --- AI Chat Component ---
 const AIChatAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([
-    { role: 'model', text: "Bonjour ! Je suis l'assistant dédié au projet Math Conquest. Je suis là pour vous aider sur le planning, les tâches et l'architecture." }
+    { role: 'model', text: "Bonjour ! Je suis l'assistant dédié au projet Math Conquest. Je peux vous aider avec le planning, les tâches techniques et l'organisation." }
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -72,20 +75,25 @@ const AIChatAssistant = () => {
         techStack: "React, Vite, Tailwind, Python, Supabase (PostgreSQL, Auth, RLS), OpenAI Vision, WolframAlpha"
       });
 
-      const systemInstruction = `Tu es "L'Assistant Math Conquest", une IA experte en gestion de projet dédiée à cette application.
+      const systemInstruction = `Tu es "L'Assistant Math Conquest", une IA experte en gestion de projet et développement logiciel.
       
-      CONTEXTE DU PROJET :
+      CONTEXTE DU PROJET (JSON):
       ${projectContext}
 
-      RÈGLES STRICTES D'IDENTITÉ :
-      1. Tu N'ES PAS Gemini, ni Google, ni une IA générique.
-      2. Tu es une IA spécialisée conçue pour l'équipe Math Conquest.
-      3. Si on te demande qui t'a créé, réponds que tu es l'assistant virtuel du projet Math Conquest.
+      RÈGLES D'IDENTITÉ :
+      1. Tu es l'assistant virtuel du projet Math Conquest.
 
-      RÈGLES DE RÉPONSE :
-      1. Réponds de manière précise en te basant sur le planning et les rôles définis ci-dessus.
-      2. Fournis des solutions techniques concrètes (code, architecture) si demandé.
-      3. Sois professionnel, motivant et direct.
+      RÈGLES DE FORMATTAGE (IMPORTANT):
+      1. Utilise le **Markdown** pour structurer tes réponses.
+      2. Utilise des **listes à puces** pour énumérer des points.
+      3. Utilise le **Gras** pour mettre en valeur les mots clés ou noms.
+      4. Si tu donnes du code, utilise des blocs de code.
+      5. Sois concis mais complet.
+
+      EXEMPLE DE RÉPONSE ATTENDUE:
+      "Voici les tâches de **Dekens** pour le Sprint 1 :
+      * Tâche A
+      * Tâche B"
       `;
 
       const ai = new GoogleGenAI({ apiKey: apiKey });
@@ -113,17 +121,16 @@ const AIChatAssistant = () => {
       
       if (error instanceof Error) {
         if (error.message === "API_KEY_MISSING") {
-          errorMessage = `⚠️ <b>Erreur de configuration Vercel</b><br/><br/>
-          L'application ne trouve pas la clé API. Sur Vercel, les variables pour le frontend DOIVENT commencer par <code>VITE_</code>.<br/><br/>
-          <b>Solution :</b><br/>
-          1. Allez dans Vercel > Settings > Environment Variables<br/>
-          2. Ajoutez une variable nommée <code>VITE_API_KEY</code><br/>
-          3. Collez votre clé API<br/>
-          4. <b>Redéployez</b> le projet.`;
+          errorMessage = `⚠️ **Erreur de Configuration**
+
+L'application ne trouve pas la clé API. 
+
+**Solution pour Vercel :**
+1. Allez dans **Settings** > **Environment Variables**
+2. Ajoutez \`VITE_API_KEY\` avec votre clé.
+3. **Redéployez** le projet.`;
         } else if (error.message.includes("API key")) {
           errorMessage = "Erreur de clé API : La clé fournie semble invalide.";
-        } else if (error.message.includes("fetch") || error.message.includes("network")) {
-          errorMessage = "Erreur de connexion réseau. Vérifiez votre connexion internet.";
         }
       }
 
@@ -168,10 +175,10 @@ const AIChatAssistant = () => {
                 <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
                   msg.role === 'user' 
                     ? 'bg-blue-600 text-white rounded-tr-none shadow-md' 
-                    : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm'
+                    : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm markdown-content'
                 }`}>
                   {msg.role === 'model' ? (
-                     <div dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
+                     <div dangerouslySetInnerHTML={{ __html: marked.parse(msg.text) }} />
                   ) : (
                     msg.text
                   )}
