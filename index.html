@@ -64,6 +64,16 @@
       .stagger-3 { animation-delay: 300ms; }
       .stagger-4 { animation-delay: 400ms; }
       .stagger-5 { animation-delay: 500ms; }
+      
+      /* Loading State */
+      #root:empty::before {
+        content: 'Chargement du plan...';
+        display: block;
+        text-align: center;
+        margin-top: 20vh;
+        color: #64748b;
+        font-family: 'Inter', sans-serif;
+      }
     </style>
   <script type="importmap">
 {
@@ -78,5 +88,6 @@
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

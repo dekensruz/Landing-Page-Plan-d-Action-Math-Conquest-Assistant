@@ -13,24 +13,40 @@ const App: React.FC = () => {
   // Calcul dynamique de la durée
   const durationInfo = useMemo(() => {
     const parseDate = (dateStr: string) => {
-      const parts = dateStr.split(' ');
-      const day = parseInt(parts[0], 10);
-      const year = parseInt(parts[2], 10);
-      const months: { [key: string]: number } = {
-        'Janvier': 0, 'Février': 1, 'Mars': 2, 'Avril': 3, 'Mai': 4, 'Juin': 5,
-        'Juillet': 6, 'Août': 7, 'Septembre': 8, 'Octobre': 9, 'Novembre': 10, 'Décembre': 11
-      };
-      const month = months[parts[1]];
-      return new Date(year, month, day);
+      try {
+        if (!dateStr) return null;
+        const parts = dateStr.split(' ');
+        if (parts.length < 3) return null;
+
+        const day = parseInt(parts[0], 10);
+        const year = parseInt(parts[2], 10);
+        const months: { [key: string]: number } = {
+          'Janvier': 0, 'Février': 1, 'Mars': 2, 'Avril': 3, 'Mai': 4, 'Juin': 5,
+          'Juillet': 6, 'Août': 7, 'Septembre': 8, 'Octobre': 9, 'Novembre': 10, 'Décembre': 11
+        };
+        const month = months[parts[1]];
+        if (month === undefined) return null;
+        
+        return new Date(year, month, day);
+      } catch (e) {
+        return null;
+      }
     };
 
     try {
       const start = parseDate(PROJECT_INFO.startDate);
       const end = parseDate(PROJECT_INFO.endDate);
+      
+      if (!start || !end) return PROJECT_INFO.duration;
+
       const diffTime = Math.abs(end.getTime() - start.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-      const weeks = Math.round(diffDays / 7);
-      return `${diffDays} jours (${weeks} semaines)`;
+      
+      // On ajoute 1 jour car la durée est inclusive
+      const totalDays = diffDays + 1;
+      const weeks = Math.round(totalDays / 7);
+      
+      return `${totalDays} jours (${weeks} semaines)`;
     } catch (e) {
       return PROJECT_INFO.duration; // Fallback
     }
