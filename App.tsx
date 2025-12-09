@@ -26,7 +26,7 @@ const AIChatAssistant = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([
-    { role: 'model', text: "Bonjour ! Je suis l'assistant dédié au projet Math Conquest. Je peux vous aider avec le planning, les tâches techniques et l'organisation." }
+    { role: 'model', text: "Bonjour ! Je suis l'assistant du projet **Math Conquest**. Nous partons de zéro sur ce développement. Comment puis-je vous aider (Architecture, Planning, Tâches) ?" }
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -72,16 +72,17 @@ const AIChatAssistant = () => {
         team: TEAM,
         risks: RISKS,
         objectives: OBJECTIVES,
-        techStack: "React, Vite, Tailwind, Python, Supabase (PostgreSQL, Auth, RLS), OpenAI Vision, WolframAlpha"
+        techStack: "Backend: Python (FastAPI), SQLAlchemy, Alembic. Frontend: React, Vite, Tailwind. DB: PostgreSQL. Auth: JWT (Bcrypt). IA: OpenAI Vision, WolframAlpha."
       });
 
-      const systemInstruction = `Tu es "L'Assistant Math Conquest", une IA experte en gestion de projet et développement logiciel.
+      const systemInstruction = `Tu es "L'Assistant Math Conquest", une IA experte en gestion de projet et développement logiciel fullstack.
       
-      CONTEXTE DU PROJET (JSON):
+      CONTEXTE DU PROJET (JSON - NOUVEAU DÉVELOPPEMENT FROM SCRATCH):
       ${projectContext}
 
       RÈGLES D'IDENTITÉ :
       1. Tu es l'assistant virtuel du projet Math Conquest.
+      2. Le projet démarre de ZÉRO (Greenfield). Il n'y a pas d'application existante.
 
       RÈGLES DE FORMATTAGE (IMPORTANT):
       1. Utilise le **Markdown** pour structurer tes réponses.
@@ -91,9 +92,9 @@ const AIChatAssistant = () => {
       5. Sois concis mais complet.
 
       EXEMPLE DE RÉPONSE ATTENDUE:
-      "Voici les tâches de **Dekens** pour le Sprint 1 :
-      * Tâche A
-      * Tâche B"
+      "Voici les tâches de **Verbeck** (Backend) pour le Sprint 1 :
+      * Setup FastAPI
+      * Implémentation Auth JWT"
       `;
 
       const ai = new GoogleGenAI({ apiKey: apiKey });
@@ -376,7 +377,7 @@ const App: React.FC = () => {
                <p className="text-slate-500 text-lg">Feuille de route sur 3 semaines</p>
              </div>
              <div className="hidden lg:flex gap-3">
-               {['Initialisation', 'Déploiement', 'Livraison'].map((t, i) => (
+               {['Initialisation', 'Intégration', 'Livraison'].map((t, i) => (
                  <div key={i} className="flex items-center gap-2 px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full border border-white/60 shadow-sm text-sm font-medium text-slate-600">
                    <div className={`w-2 h-2 rounded-full ${i===0 ? 'bg-blue-500' : i===1 ? 'bg-indigo-500' : 'bg-purple-500'}`}></div>
                    {t}
@@ -540,10 +541,10 @@ const App: React.FC = () => {
             
             <div className="space-y-4 relative z-10">
               {[
-                { label: "Auth Supabase", val: "100%", sub: "Fonctionnelle" },
-                { label: "RLS Security", val: "Actif", sub: "Sur toutes les tables" },
-                { label: "Temps API", val: "< 5s", sub: "Latence cible" },
-                { label: "Déploiement", val: "Prod", sub: "Dispo 19 Déc" },
+                { label: "Auth Backend", val: "100%", sub: "JWT & Bcrypt" },
+                { label: "DB Schema", val: "Validé", sub: "PostgreSQL" },
+                { label: "Temps API", val: "< 5s", sub: "Cible Latence" },
+                { label: "Déploiement", val: "Prod", sub: "Dispo 30 Déc" },
                 { label: "Tests E2E", val: "100%", sub: "Couverture critique" }
               ].map((metric, idx) => (
                 <div key={idx} className="flex items-center justify-between bg-white/5 border border-white/5 p-4 rounded-2xl hover:bg-white/10 transition-colors">

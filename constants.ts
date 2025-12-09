@@ -11,157 +11,170 @@ import {
   Shield, 
   Users, 
   Video,
-  Smartphone
+  Smartphone,
+  Code2,
+  Cpu,
+  GraduationCap
 } from 'lucide-react';
 
 export const PROJECT_INFO = {
   title: "Math Conquest Assistant",
-  subtitle: "Plan d'Action & Stratégie de Déploiement",
-  startDate: "08 Décembre 2025",
+  subtitle: "Développement Intégral (From Scratch)",
+  startDate: "09 Décembre 2025",
   endDate: "30 Décembre 2025",
-  duration: "22 jours (3 semaines)"
+  duration: "21 jours (3 semaines)"
 };
 
 export const CURRENT_STATE = [
-  { label: "App Fonctionnelle", icon: Smartphone, desc: "Frontend + Backend opérationnels" },
-  { label: "Vision IA", icon: Search, desc: "Extraction LaTeX via OpenAI" },
-  { label: "Résolution", icon: CheckCircle, desc: "Intégration WolframAlpha" },
-  { label: "Pédagogie", icon: FileText, desc: "Explications étape par étape" },
-  { label: "Chat", icon: Users, desc: "Interactif & Contextuel" },
-  { label: "Export", icon: FileText, desc: "Génération PDF fonctionnelle" }
+  { label: "Démarrage Projet", icon: Code2, desc: "Initialisation Repository & Env" },
+  { label: "Architecture", icon: Server, desc: "Design FastAPI + PostgreSQL" },
+  { label: "Design UI", icon: Layout, desc: "Wireframes & Maquettes Onboarding" },
+  { label: "Base de données", icon: Database, desc: "Schéma SQL & Modèles" },
+  { label: "Sécurité", icon: Lock, desc: "Planification Auth JWT" },
+  { label: "Infra", icon: Globe, desc: "Setup Render/Vercel" }
 ];
 
 export const OBJECTIVES = [
-  "Implémenter l'authentification et la gestion de données (Supabase)",
-  "Migrer l'historique vers une base de données cloud",
-  "Optimiser et sécuriser l'application existante",
-  "Tests exhaustifs (QA/E2E)",
-  "Déploiement Production (Render/Netlify/Vercel)",
-  "Documentation complète & Vidéo démo"
+  "Développer une architecture robuste (FastAPI + PostgreSQL)",
+  "Créer un système d'Authentification complet (JWT, Bcrypt)",
+  "Implémenter un Onboarding utilisateur personnalisé",
+  "Intégrer l'IA (Vision + Résolution) et WolframAlpha",
+  "Assurer une couverture de tests E2E et Unitaires",
+  "Livrer une documentation technique et utilisateur complète"
 ];
 
 export const SPRINTS = [
   {
     id: 1,
-    title: "SPRINT 1 : Finalisation & Tests",
-    dates: "08 - 15 Décembre",
+    title: "SPRINT 1 : Setup & Architecture",
+    dates: "09 - 16 Décembre",
     duration: "8 jours",
     color: "blue",
     tasks: [
       {
         days: "J1-J2",
-        title: "Audit & Config",
+        title: "Init & Arch",
         items: [
-          "Config GitHub (Repos, Branches, Projects)",
-          "Audit complet de l'app existante",
-          "Définition standards de code (Git Flow)"
+          "Config GitHub (Repo, Flow, Projects)",
+          "Architecture Backend (FastAPI)",
+          "Choix DB (PostgreSQL/MySQL)"
         ]
       },
       {
         days: "J3-J4",
-        title: "Backend & DB",
+        title: "Backend Core",
         items: [
-          "Setup Supabase (Auth, Tables, RLS)",
-          "Middleware Python & Token verify",
-          "Migration Schema DB"
+          "Setup FastAPI & SQLAlchemy",
+          "Création Modèles (User, Profile)",
+          "Scripts Migration (Alembic)"
         ]
       },
       {
         days: "J5-J6",
-        title: "Frontend Auth",
+        title: "Auth System",
         items: [
-          "Intégration @supabase/js",
-          "Pages Login/Register/Profile",
-          "Migration LocalStorage -> Cloud"
+          "Auth JWT (Login, Register, Refresh)",
+          "Hashage Pwd (Bcrypt)",
+          "Middleware Sécurité"
         ]
       },
       {
         days: "J7-J8",
-        title: "QA & Fixes",
+        title: "Onboarding API",
         items: [
-          "Tests E2E & Unitaires",
-          "Optimisation Prompts OpenAI",
-          "Correction bugs critiques"
+          "Endpoints Onboarding (Steps)",
+          "Logique de personnalisation",
+          "Tests API Auth/Onboarding"
         ]
       }
     ]
   },
   {
     id: 2,
-    title: "SPRINT 2 : Déploiement & Docs",
-    dates: "16 - 23 Décembre",
+    title: "SPRINT 2 : Frontend & Intégration",
+    dates: "17 - 24 Décembre",
     duration: "8 jours",
     color: "indigo",
     tasks: [
       {
         days: "J9-J10",
-        title: "Pré-Prod",
+        title: "Front Setup",
         items: [
-          "Config CI/CD GitHub Actions",
-          "Env Variables & Sécurité",
-          "Build optimization"
+          "Init React + Vite + Tailwind",
+          "Contexte Auth (JWT Handling)",
+          "Pages Login/Register"
         ]
       },
       {
         days: "J11-J12",
-        title: "Déploiement",
+        title: "Onboarding UI",
         items: [
-          "Backend -> Render/Railway",
-          "Frontend -> Netlify/Vercel",
-          "Tests en production (SSL, CORS)"
+          "Wizard Multi-étapes",
+          "Design Responsive",
+          "Intégration API Onboarding"
         ]
       },
       {
         days: "J13-J14",
-        title: "Documentation",
+        title: "Core Features",
         items: [
-          "README complet & Wiki",
-          "Documentation API & Composants",
-          "Guide Utilisateur"
+          "Upload Image & Caméra",
+          "Affichage LaTeX & Solutions",
+          "Chat Interface"
         ]
       },
       {
         days: "J15-J16",
-        title: "Stabilisation",
+        title: "Logic Backend",
         items: [
-          "Tests finaux production",
-          "Retrospective Sprint 2"
+          "Integr. OpenAI Vision + Wolfram",
+          "Adaptation niveau scolaire",
+          "Historique & Préférences"
         ]
       }
     ]
   },
   {
     id: 3,
-    title: "SPRINT 3 : Livraison & Demo",
-    dates: "24 - 30 Décembre",
-    duration: "7 jours",
+    title: "SPRINT 3 : Livraison & Déploiement",
+    dates: "25 - 30 Décembre",
+    duration: "6 jours",
     color: "purple",
     tasks: [
       {
-        days: "J17-J19",
-        title: "Préparation",
+        days: "J17-J18",
+        title: "QA & Optim",
         items: [
-          "Script de présentation",
-          "Scénarios de démo",
-          "Screenshots finaux"
+          "Tests E2E complets",
+          "Tests Mobile/Responsive",
+          "Correction bugs critiques"
         ]
       },
       {
-        days: "J20-J22",
-        title: "Vidéo Démo",
+        days: "J19-J20",
+        title: "Production",
         items: [
-          "Enregistrement parcours utilisateur",
-          "Montage vidéo (3-5 min)",
-          "Mise en avant 'Wow Factor'"
+          "DB Prod & Migrations",
+          "Backend -> Render/Railway",
+          "Frontend -> Netlify/Vercel"
         ]
       },
       {
-        days: "J23",
+        days: "J21",
+        title: "Docs & Demo",
+        items: [
+          "Documentation API & User",
+          "Screenshots & Présentation",
+          "Nettoyage Code"
+        ]
+      },
+      {
+        days: "J22",
         title: "Livraison",
         items: [
-          "Package final",
-          "Tag version v1.0.0",
-          "Présentation finale"
+          "Vidéo Démo",
+          "Tag v1.0.0",
+          "Remise du projet"
         ]
       }
     ]
@@ -174,41 +187,41 @@ export const TEAM = [
     role: "Chef de Projet / Scrum Master",
     initials: "DK",
     color: "bg-blue-500",
-    tasks: ["Coordination", "Planning", "Vidéo Démo", "Communication"]
+    tasks: ["Gestion GitHub", "Coordination", "Validation Onboarding", "Vidéo Démo"]
   },
   {
     name: "Israêl",
     role: "Lead Dev / Architecte",
     initials: "IS",
     color: "bg-purple-500",
-    tasks: ["Architecture DB", "Supabase Setup", "Code Review", "Sécurité RLS"]
+    tasks: ["Architecture Globale", "Choix Tech DB", "Code Review", "Support"]
   },
   {
     name: "Verbeck",
     role: "Backend Dev",
     initials: "VB",
     color: "bg-green-500",
-    tasks: ["API Python", "Middleware Auth", "Optimisation", "Migration Data"]
+    tasks: ["FastAPI Setup", "Auth JWT", "API Onboarding", "Logique Métier"]
   },
   {
     name: "Thibaut",
     role: "Frontend Dev",
     initials: "TH",
     color: "bg-pink-500",
-    tasks: ["React Components", "Pages Auth", "UI/UX", "Integration Supabase"]
+    tasks: ["React Setup", "UI Onboarding", "Intégration API", "UX Design"]
   },
   {
     name: "Sarah",
     role: "QA / DevOps",
     initials: "SA",
     color: "bg-orange-500",
-    tasks: ["Tests E2E", "CI/CD", "Déploiement Prod", "Documentation"]
+    tasks: ["Tests E2E/Unit", "CI/CD", "Déploiement Prod", "Docs"]
   }
 ];
 
 export const RISKS = [
-  { title: "Déploiement", risk: "Problèmes config prod", mitigation: "Tests précoce (J9)", owner: "Sarah" },
-  { title: "Qualité", risk: "Bugs critiques tardifs", mitigation: "Tests exhaustifs S1", owner: "Sarah/Team" },
-  { title: "Planning", risk: "Retards tâches", mitigation: "Daily Stand-ups", owner: "Dekens" },
-  { title: "Technique", risk: "Limites API/Auth", mitigation: "POC rapide J3-J5", owner: "Israêl/Verbeck" },
+  { title: "Base de Données", risk: "Config complexe", mitigation: "Docker local + Docs", owner: "Verbeck/Israêl" },
+  { title: "UX Onboarding", risk: "Trop complexe", mitigation: "Design simple + Tests", owner: "Thibaut/Dekens" },
+  { title: "Logique Métier", risk: "Personnalisation", mitigation: "Architecture claire", owner: "Verbeck/Thibaut" },
+  { title: "Déploiement", risk: "Problèmes Prod", mitigation: "Tests déploiement J19", owner: "Sarah" },
 ];
